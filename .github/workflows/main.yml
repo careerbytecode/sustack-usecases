@@ -5,10 +5,10 @@ on:
     branches: [ "main" ]
 #Environment Variables
 env:
-  PROJECT_ID: REPLACE_YOUR_PROJECT_ID_NAME   #Google Cloud project id
-  GAR_LOCATION: ARTIFACT REGISTRY LOCATION   #Artifact Registry location
-  REPOSITORY: REPO_NAME                     #Artifact Registry repository name
-  SERVICE: REPO_NAME                     #Cloud Run service name
+  PROJECT_ID: pocproject-431620   #Google Cloud project id
+  GAR_LOCATION: us-central1   #Artifact Registry location
+  REPOSITORY: sustack-usecases                     #Artifact Registry repository name
+  SERVICE: sustack-usecases                     #Cloud Run service name
   REGION: us-central1                       #Region Name, where Cloud Run service needs to be deployed.
 jobs:
   deploy:
