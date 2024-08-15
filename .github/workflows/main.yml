@@ -1,0 +1,57 @@
+#YAML File to Build the image from Source code,push the Docker Image to Artifactory Repository and Deploy to GCP Cloud Run.
+name: Build and Deploy to Cloud Run
+on:
+  push:
+    branches: [ "main" ]
+#Environment Variables
+env:
+  PROJECT_ID: REPLACE_YOUR_PROJECT_ID_NAME   #Google Cloud project id
+  GAR_LOCATION: ARTIFACT REGISTRY LOCATION   #Artifact Registry location
+  REPOSITORY: REPO_NAME                     #Artifact Registry repository name
+  SERVICE: REPO_NAME                     #Cloud Run service name
+  REGION: us-central1                       #Region Name, where Cloud Run service needs to be deployed.
+jobs:
+  deploy:
+  
+    # Add 'id-token' with the intended permissions for workload identity federation
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # NOTE: Alternative option - authentication via credentials json
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      # BEGIN - Docker auth and build
+
+      # Authenticate Docker to Google Cloud Artifact Registry
+      - name: Configure docker for GCP
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}" ./
+          docker push "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}"
+      # END - Docker auth and build
+
+      #Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}
+          allow-unauthenticated: true
+
+      #Cloud Run URL
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
