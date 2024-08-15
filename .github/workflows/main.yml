@@ -37,9 +37,8 @@ jobs:
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build and Push Container
-        run:
-          docker build -t "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}" ./
-          docker push "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}"
+        run: docker build -t "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}" ./
+        run: docker push "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}"
       # END - Docker auth and build
 
       #Deploy to Cloud Run
