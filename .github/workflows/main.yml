@@ -36,8 +36,9 @@ jobs:
       - name: Configure docker for GCP
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Build and Push Container
+      - name: Build
         run: docker build -t "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}" ./
+      - name: Push Container
         run: docker push "${{ env.GAR_LOCATION }}/${{ env.SERVICE }}:${{ github.sha }}"
       # END - Docker auth and build
 
